@@ -92,16 +92,16 @@ class MainWindow < JFrame
 	   if minutes > Storage['big_break_time']
 	     begin
            @real_name = SwingHelpers.get_user_input("name for next pomodoro? #{minutes}m", Storage['real_name']) 
-		   Storage['all_done'] = Storage['all_done'] + [@real_name] # save history away for now... 
-		 rescue Exception => canceled
-		   SwingHelpers.hard_exit # so we don't have to shutdown timers, blah blah
-		 end
-		 Storage['real_name'] = @real_name
+		     Storage['all_done'] = Storage['all_done'] + [@real_name] # save history away for now... 
+		   rescue Exception => canceled
+		     SwingHelpers.hard_exit # so we don't have to shutdown timers, blah blah
+		   end
+		   Storage['real_name'] = @real_name
          @name = @real_name
-		 Thread.new { 
-		   sleep 0.5; 
-		   SwingHelpers.invoke_in_gui_thread {minimize}
-		 }
+		   Thread.new { 
+		     sleep 0.5; 
+		     SwingHelpers.invoke_in_gui_thread {minimize}
+		   }
 	   else
 	     @name = "big break!"
 		end
@@ -115,7 +115,7 @@ end
 
 if $0 == __FILE__
   if ARGV.length == 0
-    p 'syntax: minutes1 minutes2 [it will loop, for pomodoro]'
+    SwingHelpers.show_message 'syntax: minutes1 minutes2 [it will loop, for pomodoro]'
   else
     SwingHelpers.invoke_in_gui_thread { MainWindow.new.show }
   end
