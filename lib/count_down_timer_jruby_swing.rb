@@ -9,10 +9,11 @@ include SwingHelpers
 class MainWindow < JFrame
 
   def set_normal_size
-      set_size 200,80
+    set_size 200,80
   end
   
   def super_size
+    unminimize
     set_size 1650,1000
     self.always_on_top=true
   end
@@ -20,7 +21,7 @@ class MainWindow < JFrame
   def initialize
       super "welcome..."
       set_normal_size
-	  set_location 100,100
+	    set_location 100,100
       com.sun.awt.AWTUtilities.setWindowOpacity(self, 0.8) 
       @time_remaining_label = JLabel.new 'Welcome...'
       happy = Font.new("Tahoma", Font::PLAIN, 11)
@@ -46,22 +47,19 @@ class MainWindow < JFrame
         next_up = starting_seconds_requested[(cur_index+1) % starting_seconds_requested.length]
         seconds_left = (seconds_requested - (Time.now - @start_time)).to_i
         if seconds_left < 0
-          setState ( java.awt.Frame::NORMAL )
-          setVisible(true)
-          toFront()
           super_size
           set_title 'done!'
-		  a = PlayMp3Audio.new('diesel.mp3')
-		  a.start
+		      a = PlayMp3Audio.new('diesel.mp3')
+		      a.start
           SwingHelpers.show_blocking_message_dialog "Timer done! #{seconds_requested/60}m at #{Time.now}. Next up #{next_up/60}m." 
-		  a.stop
-		  minutes = next_up/60
+		      a.stop
+		      minutes = next_up/60
           setup_pomo_name minutes
-		  if(minutes > Storage['break_time'])
+		      if(minutes > Storage['break_time'])
             set_normal_size
-		  else
-		    super_size # for breaks to force them...
-		  end
+		      else
+		        super_size # for breaks to force them...
+		      end
           @start_time = Time.now
           cur_index += 1
           self.always_on_top=true
@@ -89,22 +87,22 @@ class MainWindow < JFrame
   
   def setup_pomo_name minutes
      if minutes > Storage['break_time']
-	   if minutes > Storage['big_break_time']
-	     begin
+  	   if minutes > Storage['big_break_time']
+  	     begin
            @real_name = SwingHelpers.get_user_input("name for next pomodoro? #{minutes}m", Storage['real_name']) 
-		     Storage['all_done'] = Storage['all_done'] + [@real_name] # save history away for now... 
-		   rescue Exception => canceled
-		     SwingHelpers.hard_exit # so we don't have to shutdown timers, blah blah
-		   end
-		   Storage['real_name'] = @real_name
+  		     Storage['all_done'] = Storage['all_done'] + [@real_name] # save history away for now... 
+  		   rescue Exception => canceled
+  		     SwingHelpers.hard_exit # so we don't have to shutdown timers, blah blah
+  		   end
+  		   Storage['real_name'] = @real_name
          @name = @real_name
-		   Thread.new { 
-		     sleep 0.5; 
-		     SwingHelpers.invoke_in_gui_thread {minimize}
-		   }
-	   else
-	     @name = "big break!"
-		end
+  		   Thread.new { 
+  		     sleep 0.5; 
+  		     SwingHelpers.invoke_in_gui_thread {minimize}
+  		   }
+  	   else
+  	     @name = "big break!"
+  		end
      else
        @name = "break!"
      end
@@ -117,6 +115,6 @@ if $0 == __FILE__
   if ARGV.length == 0
     SwingHelpers.show_message 'syntax: minutes1 minutes2 [it will loop, for pomodoro]'
   else
-    SwingHelpers.invoke_in_gui_thread { MainWindow.new.show }
+    MainWindow.new.show
   end
 end
