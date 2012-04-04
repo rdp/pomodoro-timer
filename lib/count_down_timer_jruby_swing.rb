@@ -15,11 +15,20 @@ class MainWindow < JFrame
   def super_size
     unminimize
     set_size 1650,1000
-    self.always_on_top=true
+    self.always_on_top=true # I think I need to redo this after each JOptionPane call for jdk6...
   end
 
+  Storage = ::Storage.new("pomo_timer")
+  Storage.set_default('break_time', 5)
+  Storage.set_default('big_break_time', 15)
+  Storage.set_default('all_done', [])
+  
+  # my actual values LODO preference-ize
+  Storage['break_time'] = 7
+  Storage['big_break_time'] = 15
+
   def initialize
-      super "welcome..."
+      super # avoid weird bugz in calling methods before proper initialization...
       set_normal_size
 	    set_location 100,100
       com.sun.awt.AWTUtilities.setWindowOpacity(self, 0.8) 
@@ -43,6 +52,7 @@ class MainWindow < JFrame
       setup_pomo_name starting_seconds_requested[0]/60
       @switch_image_timer = javax.swing.Timer.new(1000, nil) # nil means it has no default person to call when the action has occurred...
       @switch_image_timer.add_action_listener do |e|
+        p 'in timer'
         seconds_requested = starting_seconds_requested[cur_index % starting_seconds_requested.length]
         next_up = starting_seconds_requested[(cur_index+1) % starting_seconds_requested.length]
         seconds_left = (seconds_requested - (Time.now - @start_time)).to_i
@@ -50,10 +60,10 @@ class MainWindow < JFrame
           super_size
           set_title 'done!'
 		      Storage['all_done'] = Storage['all_done'] + [@real_name] # save history away for posterity... 
-		      a = PlayMp3Audio.new('diesel.mp3')
-		      a.start
+		      sound = PlayMp3Audio.new('diesel.mp3')
+		      sound.start
           SwingHelpers.show_blocking_message_dialog "Timer done! #{seconds_requested/60}m at #{Time.now}. Next up #{next_up/60}m." 
-		      a.stop
+		      sound.stop
 		      minutes = next_up/60
           setup_pomo_name minutes
 		      if(minutes > Storage['break_time'])
@@ -62,12 +72,12 @@ class MainWindow < JFrame
 		        super_size # for breaks to force them...
 		      end
           @start_time = Time.now
+          p 'restarting'
           cur_index += 1
-          self.always_on_top=true
         else
           # avoid weird re-draw text issues
           minutes = (seconds_left/60).to_i          
-          if minutes > 0
+          if seconds_left > 90
             current_time = "#{minutes}m"
             set_title current_time
           else
@@ -81,11 +91,6 @@ class MainWindow < JFrame
       self.always_on_top=true
   end
   
-  Storage = ::Storage.new("pomo_timer")
-  Storage.set_default('break_time', 7)
-  Storage.set_default('big_break_time', 15)
-  Storage.set_default('all_done', [])
-  
   def setup_pomo_name minutes
      if minutes > Storage['break_time']
   	   if minutes > Storage['big_break_time']
@@ -98,22 +103,22 @@ class MainWindow < JFrame
          @name = @real_name
   		   Thread.new { 
   		     sleep 0.5; 
-  		     SwingHelpers.invoke_in_gui_thread {minimize}
+  		     minimize
   		   }
   	   else
   	     @name = "big break!"
-  		end
+  		 end
      else
        @name = "break!"
      end
     @name_label.text=@name
   end
-       
+
 end
 
 if $0 == __FILE__
   if ARGV.length == 0
-    SwingHelpers.show_message 'syntax: minutes1 minutes2 [it will loop, for pomodoro]'
+    SwingHelpers.show_message 'syntax: minutes1 minutes2 ... [it will loop across these numbers]'
   else
     MainWindow.new.show
   end
