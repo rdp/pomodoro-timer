@@ -49,6 +49,7 @@ class MainWindow < JFrame
         if seconds_left < 0
           super_size
           set_title 'done!'
+		      Storage['all_done'] = Storage['all_done'] + [@real_name] # save history away for posterity... 
 		      a = PlayMp3Audio.new('diesel.mp3')
 		      a.start
           SwingHelpers.show_blocking_message_dialog "Timer done! #{seconds_requested/60}m at #{Time.now}. Next up #{next_up/60}m." 
@@ -89,8 +90,7 @@ class MainWindow < JFrame
      if minutes > Storage['break_time']
   	   if minutes > Storage['big_break_time']
   	     begin
-           @real_name = SwingHelpers.get_user_input("name for next pomodoro? #{minutes}m", Storage['real_name']) 
-  		     Storage['all_done'] = Storage['all_done'] + [@real_name] # save history away for now... 
+           @real_name = SwingHelpers.get_user_input("name for next pomodoro (from top of list)? #{minutes}m", Storage['real_name']) 
   		   rescue Exception => canceled
   		     SwingHelpers.hard_exit # so we don't have to shutdown timers, blah blah
   		   end
