@@ -52,7 +52,6 @@ class MainWindow < JFrame
       setup_pomo_name starting_seconds_requested[0]/60
       @switch_image_timer = javax.swing.Timer.new(1000, nil) # nil means it has no default person to call when the action has occurred...
       @switch_image_timer.add_action_listener do |e|
-        p 'in timer'
         seconds_requested = starting_seconds_requested[cur_index % starting_seconds_requested.length]
         next_up = starting_seconds_requested[(cur_index+1) % starting_seconds_requested.length]
         seconds_left = (seconds_requested - (Time.now - @start_time)).to_i
@@ -72,7 +71,6 @@ class MainWindow < JFrame
 		        super_size # for breaks to force them...
 		      end
           @start_time = Time.now
-          p 'restarting'
           cur_index += 1
         else
           # avoid weird re-draw text issues
