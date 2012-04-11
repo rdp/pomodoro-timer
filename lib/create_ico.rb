@@ -2,7 +2,7 @@ require 'java'
 
 module M
   include_package  'java.awt.image'; [BufferedImage]
-  include_package 'java.awt'; [RenderingHints, Font]
+  include_package 'java.awt'; [RenderingHints, Font, Color]
   include_package 'java.awt.font'; [TextLayout]
   include_package 'javax.swing'; [JFrame, JLabel]
   
@@ -26,29 +26,27 @@ module M
    graphics.setRenderingHint(RenderingHints::KEY_ANTIALIASING,
       RenderingHints::VALUE_ANTIALIAS_ON);
       
-   ICON_DIMENSION=5
+   ICON_DIMENSION=size-5
    letter = '9';
    graphics.setFont(Font.new("Arial", Font::BOLD, ICON_DIMENSION-5));
    frc = graphics.getFontRenderContext();
-   mLayout = TextLayout.new("" + letter, graphics.getFont(), frc);
+   mLayout = TextLayout.new(letter, graphics.getFont(), frc);
 
    x = (-0.5 + (ICON_DIMENSION - mLayout.getBounds().getWidth()) / 2);
    y = ICON_DIMENSION - ((ICON_DIMENSION - mLayout.getBounds().getHeight()) / 2);
-   graphics.drawString("" + letter, x, y);
+   graphics.setColor(Color::black);
+
+   graphics.drawString(letter, x, y);
    $image = image
-   
   
    class J < JFrame
      def initialize
        super
-       p 'set it'
        self.icon_image=$image
-     end
-     def go
-      show
+       p 'set it'
      end
    end
     
 end
 
-M::J.new.go
+M::J.new.show
