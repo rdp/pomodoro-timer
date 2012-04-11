@@ -3,6 +3,7 @@ require 'sane' # require_relative
 require_relative 'jruby-swing-helpers/swing_helpers'
 require_relative 'jruby-swing-helpers/play_mp3_audio'
 require_relative 'jruby-swing-helpers/storage'
+require_relative 'create_icon_from_numbers.rb'
 
 include SwingHelpers
   
@@ -75,7 +76,7 @@ class MainWindow < JFrame
         else
           # avoid weird re-draw text issues
           minutes = (seconds_left/60).to_i          
-          if seconds_left > 90
+          if seconds_left > 60
             current_time = "#{minutes}m"
             set_title current_time
           else
@@ -83,6 +84,7 @@ class MainWindow < JFrame
             set_title "#{seconds_left}s" % seconds_left
           end
           @time_remaining_label.set_text current_time
+          self.icon_image=CreateIconFromNumbers.get_letters_as_icon(seconds_left/60) # don't include the m of 24m
         end
       end
       @switch_image_timer.start
