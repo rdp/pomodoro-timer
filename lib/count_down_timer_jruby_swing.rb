@@ -78,10 +78,8 @@ class MainWindow < JFrame
           minutes = (seconds_left/60).to_i          
           if seconds_left > 60
             current_time = "#{minutes}m"
-            set_title current_time
           else
             current_time = "%2ds" % seconds_left
-            set_title "#{seconds_left}s" % seconds_left
           end
           @time_remaining_label.set_text current_time
           self.icon_image=CreateIconFromNumbers.get_letters_as_icon(seconds_left/60) # don't include the m of 24m
@@ -112,6 +110,7 @@ class MainWindow < JFrame
        @name = "break!"
      end
     @name_label.text=@name
+    set_title @name
   end
 
 end
