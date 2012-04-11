@@ -1,13 +1,14 @@
 require 'java'
 
-module M
+module CreateIconFromNumbers
   include_package  'java.awt.image'; [BufferedImage]
   include_package 'java.awt'; [RenderingHints, Font, Color]
   include_package 'java.awt.font'; [TextLayout]
   include_package 'javax.swing'; [JFrame, JLabel]
   
-  SIZE = 64
+  SIZE = 64 # doesn't seem to matter...
   ICON_DIMENSION=SIZE-5
+  
   def self.get_letters_as_icon letters
   
   image = BufferedImage.new(SIZE,SIZE, BufferedImage::TYPE_INT_ARGB);
@@ -39,13 +40,15 @@ module M
    image
   end
 
-   class J < JFrame
-     def initialize
-       super
-       self.icon_images=[M.get_letters_as_icon('09')]
-     end
-   end
     
 end
 
-M::J.new.show
+if $0 == __FILE__
+   class J < javax.swing.JFrame
+     def initialize
+       super
+       self.icon_images=[CreateIconFromNumbers.get_letters_as_icon('09')]
+     end
+   end
+  J.new.show
+end
