@@ -6,12 +6,10 @@ module CreateIconFromNumbers
   include_package 'java.awt.font'; [TextLayout]
   include_package 'javax.swing'; [JFrame, JLabel]
   
-  SIZE = 64 # doesn't seem to matter...
-  
-  def self.get_letters_as_icon letters
+  def self.get_letters_as_icon letters, size=64
     letters = letters.to_s
   
-  image = BufferedImage.new(SIZE,SIZE, BufferedImage::TYPE_INT_ARGB);
+  image = BufferedImage.new(size, size, BufferedImage::TYPE_INT_ARGB);
   graphics = g = image.createGraphics()
 #  g.setColor(Color::WHITE )
 #  g.fillRect(0,0,SIZE,SIZE)
@@ -29,7 +27,7 @@ module CreateIconFromNumbers
    graphics.setRenderingHint(RenderingHints::KEY_ANTIALIASING,
       RenderingHints::VALUE_ANTIALIAS_ON);
       
-   icon_size = SIZE-10
+   icon_size = size-10
   
    graphics.setFont(Font.new("Arial", Font::BOLD, icon_size-5));
    frc = graphics.getFontRenderContext();
@@ -50,7 +48,7 @@ if $0 == __FILE__
    class J < javax.swing.JFrame
      def initialize
        super
-       self.icon_images=[CreateIconFromNumbers.get_letters_as_icon('09')]
+       self.icon_images = (1..128).map {|n| CreateIconFromNumbers.get_letters_as_icon(n, n.to_i)}
      end
    end
   J.new.show
