@@ -78,11 +78,13 @@ class MainWindow < JFrame
           minutes = (seconds_left/60).to_i          
           if seconds_left > 60
             current_time = "#{minutes}m"
+            icon_time = minutes.to_s
           else
             current_time = "%2ds" % seconds_left
+            icon_time = current_time # have the 's' in there
           end
           @time_remaining_label.set_text current_time
-          self.icon_image=CreateIconFromNumbers.get_letters_as_icon(seconds_left/60) # don't include the m of 24m
+          self.icon_image=CreateIconFromNumbers.get_letters_as_icon(icon_time)
         end
       end
       @switch_image_timer.start
