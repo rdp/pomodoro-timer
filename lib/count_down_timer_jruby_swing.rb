@@ -84,7 +84,7 @@ class MainWindow < JFrame
             icon_time = current_time # have the 's' in there
           end
           @time_remaining_label.set_text current_time
-          self.icon_image = CreateIconFromNumbers.get_letters_as_icon(icon_time, 164) # it scales down nicely
+          self.icon_image = CreateIconFromNumbers.get_letters_as_icon(icon_time, 128) # it scales down nicely
 		  #CreateIconFromNumbers.assign_icons_to_jframe self, 'title_bar_text', 'group_icon_and_alt_tab_icon_text'
 
         end
