@@ -6,6 +6,8 @@ module CreateIconFromNumbers
   include_package 'java.awt.font'; [TextLayout]
   include_package 'javax.swing'; [JFrame, JLabel]
   
+  # unfortunatley it uses the 20 for the window icon itself, which seems too small, like a bug, so recommend just using some large number,
+  # not this method :)
   def self.assign_icons_to_jframe jframe, title_bar_text, group_icon_and_alt_tab_icon_text
     jframe.icon_images = [get_letters_as_icon(title_bar_text, 20), get_letters_as_icon(group_icon_and_alt_tab_icon_text, 40)]
   end
