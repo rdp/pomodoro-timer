@@ -10,7 +10,7 @@ include SwingHelpers
 class MainWindow < JFrame
 
   def set_normal_size
-    set_size 200,80
+    set_size 250,0
   end
   
   def super_size
@@ -21,7 +21,6 @@ class MainWindow < JFrame
 
   Storage = ::Storage.new("pomo_timer")
   Storage.set_default('all_done', [])
-  
   
   def setup_timings
     got = SwingHelpers.get_user_input("enter your timing minutes, like 25,4,25,15", Storage['timings'])
@@ -106,7 +105,7 @@ class MainWindow < JFrame
   		   Storage['real_name'] = @real_name
          @name = @real_name
   		   Thread.new { 
-  		     sleep 0.5; 
+  		     sleep 1.0 
   		     minimize
   		   }
   	   else
