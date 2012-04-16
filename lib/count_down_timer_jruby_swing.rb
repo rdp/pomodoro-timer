@@ -36,10 +36,7 @@ class MainWindow < JFrame
       set_normal_size
 	    set_location 100,100
       com.sun.awt.AWTUtilities.setWindowOpacity(self, 0.8) 
-      @time_remaining_label = JLabel.new 'Welcome...'
       happy = Font.new("Tahoma", Font::PLAIN, 11)
-      @time_remaining_label.set_bounds(44,44,160,14)
-      @time_remaining_label.font = happy
       @name_label = JLabel.new
       @name_label.font = happy
       @name_label.set_bounds(44,4,1600,14)
@@ -48,7 +45,6 @@ class MainWindow < JFrame
       @panel = panel
       panel.set_layout nil
       add panel # why can't I just slap these down?
-      panel.add @time_remaining_label
       panel.add @name_label
   end
   
@@ -89,8 +85,9 @@ class MainWindow < JFrame
             current_time = "%2ds" % seconds_left
             icon_time = current_time # have the 's' in there
           end
-          @time_remaining_label.set_text current_time
-          self.icon_image=CreateIconFromNumbers.get_letters_as_icon(icon_time)
+          self.icon_image = CreateIconFromNumbers.get_letters_as_icon(icon_time, 256) # it scales down nicely
+		  set_title @name + " " + current_time
+          @name_label.text = @name + " " + current_time
         end
       end
       @switch_image_timer.start
@@ -118,8 +115,6 @@ class MainWindow < JFrame
      else
        @name = "break!"
      end
-    @name_label.text=@name
-    set_title @name
   end
 
 end

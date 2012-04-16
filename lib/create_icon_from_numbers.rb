@@ -6,17 +6,22 @@ module CreateIconFromNumbers
   include_package 'java.awt.font'; [TextLayout]
   include_package 'javax.swing'; [JFrame, JLabel]
   
-  SIZE = 64 # doesn't seem to matter...
+  # unfortunatley it uses the 20 for the window icon itself, which seems too small, like a bug, so recommend just using some large number,
+  # not this method :)
+  def self.assign_icons_to_jframe jframe, title_bar_text, group_icon_and_alt_tab_icon_text
+    jframe.icon_images = [get_letters_as_icon(title_bar_text, 20), get_letters_as_icon(group_icon_and_alt_tab_icon_text, 40)]
+  end
   
-  def self.get_letters_as_icon letters
+  def self.get_letters_as_icon letters, size
     letters = letters.to_s
   
-  image = BufferedImage.new(SIZE,SIZE, BufferedImage::TYPE_INT_ARGB);
-  graphics = g = image.createGraphics()
-#  g.setColor(Color::WHITE )
-#  g.fillRect(0,0,SIZE,SIZE)
-
+    image = BufferedImage.new(size, size, BufferedImage::TYPE_INT_ARGB);
+    graphics = g = image.createGraphics
+  
 =begin needed?  
+  #  g.setColor(Color::WHITE )
+  #  g.fillRect(0,0,SIZE,SIZE)
+
    for (int col = 0; col < ICON_DIMENSION; col++) {
       for (int row = 0; row < ICON_DIMENSION; row++) {
          image.setRGB(col, row, 0x0);
@@ -29,7 +34,7 @@ module CreateIconFromNumbers
    graphics.setRenderingHint(RenderingHints::KEY_ANTIALIASING,
       RenderingHints::VALUE_ANTIALIAS_ON);
       
-   icon_size = SIZE-10
+   icon_size = size-10
   
    graphics.setFont(Font.new("Arial", Font::BOLD, icon_size-5));
    frc = graphics.getFontRenderContext();
@@ -50,8 +55,12 @@ if $0 == __FILE__
    class J < javax.swing.JFrame
      def initialize
        super
-       self.icon_images=[CreateIconFromNumbers.get_letters_as_icon('09')]
+	   icon_numbers = (1..128).map{|n| n}.reverse
+       self.icon_images = icon_numbers.map {|n| CreateIconFromNumbers.get_letters_as_icon(n, n.to_i)}
      end
    end
-  J.new.show
+  a = J.new
+  a.show
+  CreateIconFromNumbers.assign_icons_to_jframe a, 'title_bar_text', 'group_icon_and_alt_tab_icon_text'
+
 end
