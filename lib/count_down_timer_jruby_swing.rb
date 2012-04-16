@@ -1,5 +1,5 @@
 require 'rubygems'
-require 'sane' # require_relative
+require 'sane' # require_relative Array#ave
 require_relative 'jruby-swing-helpers/swing_helpers'
 require_relative 'jruby-swing-helpers/play_mp3_audio'
 require_relative 'jruby-swing-helpers/storage'
@@ -20,13 +20,16 @@ class MainWindow < JFrame
   end
 
   Storage = ::Storage.new("pomo_timer")
-  Storage.set_default('break_time', 5)
-  Storage.set_default('big_break_time', 15)
   Storage.set_default('all_done', [])
   
-  # my actual values LODO preference-ize
-  Storage['break_time'] = 7
-  Storage['big_break_time'] = 15
+  
+  def setup_timings
+    got = SwingHelpers.get_user_input("enter your timing minutes, like 25,4,25,15", Storage['timings'])
+    Storage['timings'] = got
+    @timings = got.split(',').map{|min| min.to_f*60}
+    @break_time = @timings.min/60
+    @big_break_time = @timings.uniq.sort[1]/60
+  end
 
   def initialize
       super # avoid weird bugz in calling methods before proper initialization...
@@ -47,14 +50,17 @@ class MainWindow < JFrame
       add panel # why can't I just slap these down?
       panel.add @time_remaining_label
       panel.add @name_label
+  end
+  
+  def go
+      setup_timings
       @start_time = Time.now
       cur_index = 0
-      starting_seconds_requested = ARGV.map{|a| a.to_f*60}
-      setup_pomo_name starting_seconds_requested[0]/60
+      setup_pomo_name @timings[0]/60
       @switch_image_timer = javax.swing.Timer.new(1000, nil) # nil means it has no default person to call when the action has occurred...
       @switch_image_timer.add_action_listener do |e|
-        seconds_requested = starting_seconds_requested[cur_index % starting_seconds_requested.length]
-        next_up = starting_seconds_requested[(cur_index+1) % starting_seconds_requested.length]
+        seconds_requested = @timings[cur_index % @timings.length]
+        next_up = @timings[(cur_index+1) % @timings.length]
         seconds_left = (seconds_requested - (Time.now - @start_time)).to_i
         if seconds_left < 0
           super_size
@@ -66,7 +72,7 @@ class MainWindow < JFrame
 		      sound.stop
 		      minutes = next_up/60
           setup_pomo_name minutes
-		      if(minutes > Storage['break_time'])
+		      if(minutes > @break_time)
             set_normal_size
 		      else
 		        super_size # for breaks to force them...
@@ -89,11 +95,12 @@ class MainWindow < JFrame
       end
       @switch_image_timer.start
       self.always_on_top=true
+      show
   end
   
   def setup_pomo_name minutes
-     if minutes > Storage['break_time']
-  	   if minutes > Storage['big_break_time']
+     if minutes > @break_time
+  	   if minutes > @big_break_time
   	     begin
            @real_name = SwingHelpers.get_user_input("name for next pomodoro (from top of list)? #{minutes}m", Storage['real_name']) 
   		   rescue Exception => canceled
@@ -118,9 +125,5 @@ class MainWindow < JFrame
 end
 
 if $0 == __FILE__
-  if ARGV.length == 0
-    SwingHelpers.show_message 'syntax: minutes1 minutes2 ... [it will loop across these numbers]'
-  else
-    MainWindow.new.show
-  end
+  MainWindow.new.go
 end
