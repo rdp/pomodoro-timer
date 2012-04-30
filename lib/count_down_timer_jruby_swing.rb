@@ -27,7 +27,11 @@ class MainWindow < JFrame
     Storage['timings'] = got
     @timings = got.split(',').map{|min| min.to_f*60}
     @break_time = @timings.min/60
-    @big_break_time = @timings.uniq.sort[1]/60
+	if @timings.length > 1
+      @big_break_time = @timings.uniq.sort[1]/60
+	else
+	  @big_break_time = @timings[0]
+	end
   end
 
   def initialize
@@ -52,7 +56,7 @@ class MainWindow < JFrame
       @start_time = Time.now
       cur_index = 0
       setup_pomo_name @timings[0]/60
-      @switch_image_timer = javax.swing.Timer.new(1000, nil) # nil means it has no default person to call when the action has occurred...
+      @switch_image_timer = javax.swing.Timer.new(500, nil) # nil means it has no default person to call when the action has occurred...
       @switch_image_timer.add_action_listener do |e|
         seconds_requested = @timings[cur_index % @timings.length]
         next_up = @timings[(cur_index+1) % @timings.length]
