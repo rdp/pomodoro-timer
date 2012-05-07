@@ -34,16 +34,17 @@ module CreateIconFromNumbers
    graphics.setRenderingHint(RenderingHints::KEY_ANTIALIASING,
       RenderingHints::VALUE_ANTIALIAS_ON);
       
-   icon_size = size-10
+   icon_size = size-10 # ?? some border?
+   text_size = icon_size*2/3
   
-   graphics.setFont(Font.new("Arial", Font::BOLD, icon_size-5));
+   graphics.setFont(Font.new("Arial", Font::BOLD, text_size))
    frc = graphics.getFontRenderContext();
    
    mLayout = TextLayout.new(letters, graphics.getFont(), frc)
   
    y = icon_size - ((icon_size - mLayout.getBounds().getHeight()) / 2)
    x = (icon_size - mLayout.getBounds().width) / 2
-   graphics.setColor(Color::red) # TODO more tomatoezy :P
+   graphics.setColor(Color::red) # TODO even more tomatoezy :P
    graphics.drawString(letters, x, y);
    image
   end

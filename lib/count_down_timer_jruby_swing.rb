@@ -83,7 +83,7 @@ class MainWindow < JFrame
           minutes = (seconds_left/60).to_i          
           if seconds_left > 60
             current_time = "#{minutes}m"
-            icon_time = minutes.to_s
+            icon_time = current_time # like the 'm' in there for easy glancing ability :P
           else
             current_time = "%2ds" % seconds_left
             icon_time = current_time # have the 's' in there
