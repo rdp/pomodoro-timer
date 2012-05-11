@@ -78,8 +78,14 @@ class MainWindow < JFrame
 		      end
           @start_time = Time.now
           cur_index += 1
+		  @already_shown_on_task_question = false
         else
-          # avoid weird re-draw text issues
+		  if seconds_left < seconds_requested/2 && !@already_shown_on_task_question
+		    super_size
+		    SwingHelpers.show_blocking_message_dialog "are you on target #{@name}?"
+			set_normal_size
+			@already_shown_on_task_question = true
+		  end
           minutes = (seconds_left/60).to_i          
           if seconds_left > 60
             current_time = "#{minutes}m"
