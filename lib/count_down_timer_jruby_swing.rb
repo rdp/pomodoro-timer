@@ -36,8 +36,9 @@ class MainWindow < JFrame
 
   def initialize
       super # avoid weird bugz in calling methods before proper initialization...
+	  #frame.setDefaultCloseOperation(JFrame::EXIT_ON_CLOSE) <sigh>
       set_normal_size
-	    set_location 100,100
+	  set_location 100,100
       com.sun.awt.AWTUtilities.setWindowOpacity(self, 0.8) 
       happy = Font.new("Tahoma", Font::PLAIN, 11)
       @name_label = JLabel.new
@@ -82,7 +83,7 @@ class MainWindow < JFrame
         else
 		  if seconds_left < seconds_requested/2 && !@already_shown_on_task_question
 		    super_size
-		    SwingHelpers.show_blocking_message_dialog "are you on target #{@name}?"
+		    SwingHelpers.show_blocking_message_dialog "are you on target #{@name}? [also working for work?]"
 			set_normal_size
 			@already_shown_on_task_question = true
 		  end
@@ -110,7 +111,7 @@ class MainWindow < JFrame
   	     begin
            @real_name = SwingHelpers.get_user_input("name for next pomodoro (from top of list)? #{minutes}m", Storage['real_name']) 
   		   rescue Exception => canceled
-  		     SwingHelpers.hard_exit # so we don't have to shutdown timers, blah blah
+  		     SwingHelpers.hard_exit! # so we don't have to shutdown timers, blah blah
   		   end
   		   Storage['real_name'] = @real_name
          @name = @real_name
