@@ -50,6 +50,9 @@ class MainWindow < JFrame
       panel.set_layout nil
       add panel # why can't I just slap these down?
       panel.add @name_label
+	  after_closed {
+	    SwingHelpers.hard_exit! # ignore those extra timers, blah blah
+	  }
   end
   
   def go
@@ -111,7 +114,7 @@ class MainWindow < JFrame
   	     begin
            @real_name = SwingHelpers.get_user_input("name for next pomodoro (from top of list)? #{minutes}m", Storage['real_name']) 
   		   rescue Exception => canceled
-  		     SwingHelpers.hard_exit! # so we don't have to shutdown timers, blah blah
+  		     close
   		   end
   		   Storage['real_name'] = @real_name
          @name = @real_name
