@@ -16,6 +16,7 @@ class MainWindow < JFrame
   def super_size
     unminimize
     set_size 1650,1000
+	p 'setting it always on top'
     self.always_on_top=true # I think I need to redo this after each JOptionPane call for jdk6...
   end
 
@@ -65,6 +66,7 @@ class MainWindow < JFrame
         seconds_requested = @timings[cur_index % @timings.length]
         next_up = @timings[(cur_index+1) % @timings.length]
         seconds_left = (seconds_requested - (Time.now - @start_time)).to_i
+        minutes = next_up/60
         if seconds_left < 0
           super_size
           set_title 'done!'
@@ -73,7 +75,6 @@ class MainWindow < JFrame
 		      sound.start
           SwingHelpers.show_blocking_message_dialog "Timer done! #{seconds_requested/60}m at #{Time.now}. Next up #{next_up/60}m." 
 		      sound.stop
-		      minutes = next_up/60
           setup_pomo_name minutes
 		      if(minutes > @break_time)
             set_normal_size
@@ -84,9 +85,9 @@ class MainWindow < JFrame
           cur_index += 1
 		  @already_shown_on_task_question = false
         else
-		  if seconds_left < seconds_requested/2 && !@already_shown_on_task_question
+		  if (seconds_left < seconds_requested/2) && !@already_shown_on_task_question
 		    super_size
-		    SwingHelpers.show_blocking_message_dialog "are you on target #{@name}? [also working for work?]"
+		    SwingHelpers.show_blocking_message_dialog "half-time check: are you on target #{@name}? [also working for work?]"
 			set_normal_size
 			@already_shown_on_task_question = true
 		  end
@@ -108,6 +109,10 @@ class MainWindow < JFrame
       show
   end
   
+  def am_in_break? minutes
+    minutes < @big_break_time
+  end
+    
   def setup_pomo_name minutes
      if minutes > @break_time
   	   if minutes > @big_break_time
