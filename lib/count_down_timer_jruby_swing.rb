@@ -11,6 +11,7 @@ class MainWindow < JFrame
 
   def set_normal_size
     set_size 250,0
+    self.always_on_top=true # I think I need to redo this after each JOptionPane call for jdk6...
   end
   
   def super_size
@@ -85,9 +86,9 @@ class MainWindow < JFrame
           cur_index += 1
 		  @already_shown_on_task_question = false
         else
-		  if (seconds_left < seconds_requested/2) && !@already_shown_on_task_question
+		  if (seconds_left < seconds_requested/2) && !@already_shown_on_task_question && !am_in_break?
 		    super_size
-		    SwingHelpers.show_blocking_message_dialog "half-time check: are you on target #{@name}? [also working for work?]"
+		    SwingHelpers.show_blocking_message_dialog "half-time check: are you on target for (#{@name})? [also working for work?]"
 			set_normal_size
 			@already_shown_on_task_question = true
 		  end
