@@ -86,13 +86,12 @@ class MainWindow < JFrame
           cur_index += 1
 		  @already_shown_on_task_question = false
         else
-		  if (seconds_left < seconds_requested/2) && !@already_shown_on_task_question && !am_in_break?
+		  if (seconds_left < seconds_requested/2) && !@already_shown_on_task_question && !am_in_break?(minutes)
 		    super_size
 		    SwingHelpers.show_blocking_message_dialog "half-time check: are you on target for (#{@name})? [also working for work?]"
 			set_normal_size
 			@already_shown_on_task_question = true
 		  end
-          minutes = (seconds_left/60).to_i          
           if seconds_left > 60
             current_time = "#{minutes}m"
             icon_time = current_time # like the 'm' in there for easy glancing ability :P
