@@ -25,14 +25,16 @@ class MainWindow < JFrame
   Storage.set_default('all_done', [])
   
   def setup_timings
-    got = SwingHelpers.get_user_input("enter your timing minutes, like 25,4,25,15", Storage['timings'])
+    timings = Storage['timings'] ||= [25,4,25,15]
+    got = SwingHelpers.get_user_input("Enter your timing minutes, like 25, 4, 25, 4, 25, 15 for 3x25 minute pomodoros, with 4 minute breaks, and a 15 minute long break", Storage['timings'].join(', '))
     Storage['timings'] = got
-    @timings = got.split(',').map{|min| min.to_f*60}
-    @break_time = @timings.min/60
-	if @timings.length > 1
-      @big_break_time = @timings.uniq.sort[1]/60
+    @timings_seconds = got.split(',').map{|min| min.to_f*60}
+    @break_time = @timings_seconds.min/60
+	if @timings_seconds.length > 1
+	  # median => big break
+      @big_break_time = @timings_seconds.uniq.sort[1]/60
 	else
-	  @big_break_time = @timings[0]
+	  @big_break_time = @timings_seconds[0]
 	end
   end
 
@@ -61,39 +63,45 @@ class MainWindow < JFrame
       setup_timings
       @start_time = Time.now
       cur_index = 0
-      setup_pomo_name @timings[0]/60
+      setup_pomo_name @timings_seconds[0]/60
       @switch_image_timer = javax.swing.Timer.new(500, nil) # nil means it has no default person to call when the action has occurred...
       @switch_image_timer.add_action_listener do |e|
-        seconds_requested = @timings[cur_index % @timings.length]
-        next_up = @timings[(cur_index+1) % @timings.length]
+	    if File.exist? 'break_now'
+		  require 'rubygems'
+		  require 'ruby-debug'
+		  debugger
+		end
+        seconds_requested = @timings_seconds[cur_index % @timings_seconds.length]
+        next_up = @timings_seconds[(cur_index+1) % @timings_seconds.length]
         seconds_left = (seconds_requested - (Time.now - @start_time)).to_i
-        minutes = next_up/60
+        minutes_left = seconds_left/60
         if seconds_left < 0
           super_size
           set_title 'done!'
 		      Storage['all_done'] = Storage['all_done'] + [@real_name] # save history away for posterity... 
 		      sound = PlayMp3Audio.new('diesel.mp3')
 		      sound.start
-          SwingHelpers.show_blocking_message_dialog "Timer done! #{seconds_requested/60}m at #{Time.now}. Next up #{next_up/60}m." 
+          SwingHelpers.show_blocking_message_dialog "Timer done! (#{@name}) #{seconds_requested/60}m at #{Time.now}. Next up #{next_up/60}m." 
 		      sound.stop
-          setup_pomo_name minutes
-		      if(minutes > @break_time)
-            set_normal_size
+			  next_minutes = next_up/60
+              setup_pomo_name next_minutes
+		      if(next_minutes > @break_time)
+                set_normal_size
 		      else
 		        super_size # for breaks to force them...
 		      end
           @start_time = Time.now
           cur_index += 1
-		  @already_shown_on_task_question = false
+		  @already_shown_on_task_question = false # reset
         else
-		  if (seconds_left < seconds_requested/2) && !@already_shown_on_task_question && !am_in_break?(minutes)
+		  if (seconds_left < seconds_requested/2) && !@already_shown_on_task_question && !am_in_break?(minutes_left)
 		    super_size
 		    SwingHelpers.show_blocking_message_dialog "half-time check: are you on target for (#{@name})? [also working for work?]"
 			set_normal_size
 			@already_shown_on_task_question = true
 		  end
           if seconds_left > 60
-            current_time = "#{minutes}m"
+            current_time = "#{minutes_left.to_i}m"
             icon_time = current_time # like the 'm' in there for easy glancing ability :P
           else
             current_time = "%2ds" % seconds_left
