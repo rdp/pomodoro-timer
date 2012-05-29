@@ -25,9 +25,9 @@ class MainWindow < JFrame
   Storage.set_default('all_done', [])
   
   def setup_timings
-    timings = Storage['timings'] ||= [25,4,25,15]
+    timings = Storage['timings'] ||= ['25','4','25','15']
     got = SwingHelpers.get_user_input("Enter your timing minutes, like 25, 4, 25, 4, 25, 15 for 3x25 minute pomodoros, with 4 minute breaks, and a 15 minute long break", Storage['timings'].join(', '))
-    Storage['timings'] = got
+    Storage['timings'] = got.split(',').map{|n| n.strip}
     @timings_seconds = got.split(',').map{|min| min.to_f*60}
     @break_time = @timings_seconds.min/60
 	if @timings_seconds.length > 1
