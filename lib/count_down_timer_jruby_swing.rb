@@ -1,8 +1,8 @@
 require 'rubygems'
 require 'sane' # require_relative Array#ave
-require_relative 'jruby-swing-helpers/swing_helpers'
-require_relative 'jruby-swing-helpers/play_mp3_audio'
-require_relative 'jruby-swing-helpers/storage'
+require_relative 'jruby-swing-helpers/lib/swing_helpers'
+require_relative 'jruby-swing-helpers/lib/play_mp3_audio'
+require_relative 'jruby-swing-helpers/lib/storage'
 require_relative 'create_icon_from_numbers.rb'
 
 include SwingHelpers
@@ -79,7 +79,7 @@ class MainWindow < JFrame
           super_size
           set_title 'done!'
 		      Storage['all_done'] = Storage['all_done'] + [@real_name] # save history away for posterity... 
-		      sound = PlayMp3Audio.new('diesel.mp3')
+		      sound = PlayMp3Audio.new(File.dirname(__FILE__) + '/diesel.mp3')
 		      sound.start
           SwingHelpers.show_blocking_message_dialog "Timer done! (#{@name}) #{seconds_requested/60}m at #{Time.now}. Next up #{next_up/60}m." 
 		      sound.stop
