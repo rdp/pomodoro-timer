@@ -127,6 +127,7 @@ class MainWindow < JFrame
   	     begin
            @real_name = SwingHelpers.get_user_input("name for next pomodoro (from top of list)? #{minutes}m", Storage['real_name']) 
   		   rescue Exception => canceled
+		     puts 'exiting...'
   		     close
   		   end
   		   Storage['real_name'] = @real_name
