@@ -61,9 +61,9 @@ class MainWindow < JFrame
   
   def go
       setup_timings
-      @start_time = Time.now
       cur_index = 0
       setup_pomo_name @timings_seconds[0]/60
+      @start_time = Time.now
       @switch_image_timer = javax.swing.Timer.new(500, nil) # nil means it has no default person to call when the action has occurred...
       @switch_image_timer.add_action_listener do |e|
 	    if File.exist? 'break_now'
