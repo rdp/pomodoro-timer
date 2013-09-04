@@ -78,7 +78,7 @@ class MainWindow < JFrame
         seconds_left = (seconds_requested - (Time.now - @start_time)).to_i
         minutes_left = seconds_left/60
         if seconds_left < 0
-          handle_done_with_current          
+          handle_done_with_current seconds_requested
         else
 		  if (seconds_left < seconds_requested/2) && !@already_shown_on_task_question && !am_in_break?(minutes_left)
 		    super_size
@@ -103,7 +103,7 @@ class MainWindow < JFrame
       show
   end
   
-  def handle_done_with_current
+  def handle_done_with_current seconds_requested
       super_size
       set_title 'done!'
           Storage['all_done'] = Storage['all_done'] + [@real_name] # save history away for posterity... 
