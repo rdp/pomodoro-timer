@@ -7,6 +7,7 @@ require_relative 'create_icon_from_numbers.rb'
 
 include SwingHelpers
   
+JFrame.setDefaultLookAndFeelDecorated(true) # allow opacity in windows 7
 class MainWindow < JFrame
 
   def set_normal_size
@@ -32,7 +33,8 @@ class MainWindow < JFrame
     @break_time = @timings_seconds.min/60
 	if @timings_seconds.length > 1
 	  # median => big break
-      @big_break_time = @timings_seconds.uniq.sort[1]/60
+      unique_times = @timings_seconds.uniq.sort
+      @big_break_time = unique_times[(unique_times.length-1)/2]/60
 	else
 	  @big_break_time = @timings_seconds[0]
 	end
