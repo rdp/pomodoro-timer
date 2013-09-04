@@ -63,7 +63,7 @@ class MainWindow < JFrame
   
   def go
       setup_timings
-      cur_index = 0
+      @cur_index = 0
       setup_pomo_name @timings_seconds[0]/60
       @start_time = Time.now
       @switch_image_timer = javax.swing.Timer.new(500, nil) # nil means it has no default person to call when the action has occurred...
@@ -73,28 +73,12 @@ class MainWindow < JFrame
 		  require 'ruby-debug'
 		  debugger
 		end
-        seconds_requested = @timings_seconds[cur_index % @timings_seconds.length]
-        next_up = @timings_seconds[(cur_index+1) % @timings_seconds.length]
+        seconds_requested = @timings_seconds[@cur_index % @timings_seconds.length]
+        next_up = @timings_seconds[(@cur_index+1) % @timings_seconds.length]
         seconds_left = (seconds_requested - (Time.now - @start_time)).to_i
         minutes_left = seconds_left/60
         if seconds_left < 0
-          super_size
-          set_title 'done!'
-		      Storage['all_done'] = Storage['all_done'] + [@real_name] # save history away for posterity... 
-		      sound = PlayMp3Audio.new(File.dirname(__FILE__) + '/diesel.mp3')
-		      sound.start
-          SwingHelpers.show_blocking_message_dialog "Timer done! (#{@name}) #{seconds_requested/60}m at #{Time.now}. Next up #{next_up/60}m." 
-		      sound.stop
-			  next_minutes = next_up/60
-              setup_pomo_name next_minutes
-		      if(next_minutes > @break_time)
-                set_normal_size
-		      else
-		        super_size # for breaks to force them...
-		      end
-          @start_time = Time.now
-          cur_index += 1
-		  @already_shown_on_task_question = false # reset
+          handle_done_with_current          
         else
 		  if (seconds_left < seconds_requested/2) && !@already_shown_on_task_question && !am_in_break?(minutes_left)
 		    super_size
@@ -117,6 +101,26 @@ class MainWindow < JFrame
       @switch_image_timer.start
       self.always_on_top=true
       show
+  end
+  
+  def handle_done_with_current
+      super_size
+      set_title 'done!'
+          Storage['all_done'] = Storage['all_done'] + [@real_name] # save history away for posterity... 
+          sound = PlayMp3Audio.new(File.dirname(__FILE__) + '/diesel.mp3')
+          sound.start
+      SwingHelpers.show_blocking_message_dialog "Timer done! (#{@name}) #{seconds_requested/60}m at #{Time.now}. Next up #{next_up/60}m." 
+          sound.stop
+          next_minutes = next_up/60
+          setup_pomo_name next_minutes
+          if(next_minutes > @break_time)
+            set_normal_size
+          else
+            super_size # for breaks to force them...
+          end
+      @start_time = Time.now
+      @cur_index += 1
+      @already_shown_on_task_question = false # reset
   end
   
   def am_in_break? minutes
