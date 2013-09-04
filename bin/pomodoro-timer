@@ -1,3 +1,7 @@
 $: << File.dirname(__FILE__) + "/../lib"
+# gems
+for dir in Dir[File.dirname(__FILE__) + "/../vendor/*/lib"]
+  $: << dir
+end
 require 'count_down_timer_jruby_swing.rb'
 MainWindow.new.go
