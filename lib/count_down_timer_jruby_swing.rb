@@ -74,33 +74,36 @@ class MainWindow < JFrame
 		  debugger
 		end
         seconds_requested = @timings_seconds[@cur_index % @timings_seconds.length]
-        next_up = @timings_seconds[(@cur_index+1) % @timings_seconds.length]
         seconds_left = (seconds_requested - (Time.now - @start_time)).to_i
-        minutes_left = seconds_left/60
         if seconds_left < 0
           handle_done_with_current seconds_requested
         else
-		  if (seconds_left < seconds_requested/2) && !@already_shown_on_task_question && !am_in_break?(minutes_left)
-		    super_size
-		    SwingHelpers.show_blocking_message_dialog "half-time check: are you on target for (#{@name})? [also working for work?]"
-			set_normal_size
-			@already_shown_on_task_question = true
-		  end
-          if seconds_left > 60
-            current_time = "#{minutes_left.to_i}m"
-            icon_time = current_time # like the 'm' in there for easy glancing ability :P
-          else
-            current_time = "%2ds" % seconds_left
-            icon_time = current_time # have the 's' in there
-          end
-          self.icon_image = CreateIconFromNumbers.get_letters_as_icon(icon_time, 256) # it scales down nicely
-		  set_title @name + " " + current_time
-          @name_label.text = @name + " " + current_time
+          update_current_icon_with_current_time seconds_left, seconds_requested		 
         end
       end
       @switch_image_timer.start
       self.always_on_top=true
       show
+  end
+  
+  def update_current_icon_with_current_time seconds_left, seconds_requested
+      minutes_left = seconds_left/60
+      if (seconds_left < seconds_requested/2) && !@already_shown_on_task_question && !am_in_break?(minutes_left)
+        super_size
+        SwingHelpers.show_blocking_message_dialog "half-time check: are you on target for (#{@name})? [also working for work?]"
+        set_normal_size
+        @already_shown_on_task_question = true
+      end
+      if seconds_left > 60
+        current_time = "#{minutes_left.to_i}m"
+        icon_time = current_time # like the 'm' in there for easy glancing ability :P
+      else
+        current_time = "%2ds" % seconds_left
+        icon_time = current_time # have the 's' in there
+      end
+      self.icon_image = CreateIconFromNumbers.get_letters_as_icon(icon_time, 256) # it scales down nicely
+      set_title @name + " " + current_time
+      @name_label.text = @name + " " + current_time + "/#{seconds_requested/60}m"
   end
   
   def handle_done_with_current seconds_requested
@@ -109,6 +112,7 @@ class MainWindow < JFrame
           Storage['all_done'] = Storage['all_done'] + [@real_name] # save history away for posterity... 
           sound = PlayMp3Audio.new(File.dirname(__FILE__) + '/diesel.mp3')
           sound.start
+          next_up = @timings_seconds[(@cur_index+1) % @timings_seconds.length]
       SwingHelpers.show_blocking_message_dialog "Timer done! (#{@name}) #{seconds_requested/60}m at #{Time.now}. Next up #{next_up/60}m." 
           sound.stop
           next_minutes = next_up/60
