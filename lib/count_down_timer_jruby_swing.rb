@@ -1,8 +1,8 @@
 require 'rubygems'
 require 'sane' # require_relative Array#ave
-require_relative 'jruby-swing-helpers/lib/swing_helpers'
-require_relative 'jruby-swing-helpers/lib/play_mp3_audio'
-require_relative 'jruby-swing-helpers/lib/storage'
+require_relative '../vendor/jruby-swing-helpers/lib/swing_helpers'
+require_relative '../vendor/jruby-swing-helpers/lib/play_mp3_audio'
+require_relative '../vendor/jruby-swing-helpers/lib/storage'
 require_relative 'create_icon_from_numbers.rb'
 
 include SwingHelpers
@@ -101,7 +101,7 @@ class MainWindow < JFrame
         current_time = "%2ds" % seconds_left
         icon_time = current_time # have the 's' in there
       end
-      self.icon_image = CreateIconFromNumbers.get_letters_as_icon(icon_time, 256) # it scales down nicely
+      self.icon_image = CreateIconFromNumbers.get_letters_as_icon(icon_time, 128) # it auto scales it down for us
       set_title @name + " " + current_time
       @name_label.text = @name + " " + current_time + "/#{seconds_requested/60}m"
   end
