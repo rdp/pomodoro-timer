@@ -94,7 +94,7 @@ class MainWindow < JFrame
         set_normal_size
         @already_shown_on_task_question = true
       end
-      if seconds_left > 60
+      if seconds_left > 99 # more than double digits :)
         current_time = "#{minutes_left.to_i}m"
         icon_time = current_time # like the 'm' in there for easy glancing ability :P
       else
@@ -102,7 +102,7 @@ class MainWindow < JFrame
         icon_time = current_time # have the 's' in there
       end
       self.icon_image = CreateIconFromNumbers.get_letters_as_icon(icon_time, 128) # it auto scales it down for us
-      set_title @name + " " + current_time
+      set_title current_time + " " + @name
       @name_label.text = @name + " " + current_time + "/#{seconds_requested/60}m"
   end
   
