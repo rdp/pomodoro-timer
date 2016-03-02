@@ -7,7 +7,7 @@ require_relative 'create_icon_from_numbers.rb'
 
 include SwingHelpers
   
-JFrame.setDefaultLookAndFeelDecorated(true) # allow opacity in windows 7
+#JFrame.setDefaultLookAndFeelDecorated(true) # allow opacity in windows 7 -- not enough on mac?
 class MainWindow < JFrame
 
   def set_normal_size
@@ -45,6 +45,7 @@ class MainWindow < JFrame
 	  #frame.setDefaultCloseOperation(JFrame::EXIT_ON_CLOSE) <sigh>
       set_normal_size
 	  set_location 100,100
+      set_undecorated true # allow opacity mac
       com.sun.awt.AWTUtilities.setWindowOpacity(self, 0.8) 
       happy = Font.new("Tahoma", Font::PLAIN, 11)
       @name_label = JLabel.new
