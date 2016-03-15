@@ -27,17 +27,18 @@ class MainWindow < JFrame
   
   def setup_timings
     timings = Storage['timings'] ||= ['25','4','25','15']
-    got = SwingHelpers.get_user_input("Enter your timing minutes, like 25, 4, 25, 4, 25, 15 for 3x25 minute pomodoros, with 4 minute breaks, and a 15 minute long break", Storage['timings'].join(', '))
-    Storage['timings'] = got.split(',').map{|n| n.strip}
-    @timings_seconds = got.split(',').map{|min| min.to_f*60}
-    @break_time = @timings_seconds.min/60
-	if @timings_seconds.length > 1
-	  # median => big break
+    got_minutes = SwingHelpers.get_user_input("Enter your timing minutes, like 25, 4, 25, 4, 25, 15 for 3x25 minute pomodoros, with 4 minute breaks, and a 15 minute long break [must be small break < large break < pomo]", Storage['timings'].join(', '))
+    Storage['timings'] = got_minutes.split(',').map{|n| n.strip}
+    @timings_seconds = got_minutes.split(',').map{|minute| minute.to_f*60}
+    @break_time = @timings_seconds.min/60 # break time is smallest number
+    if @timings_seconds.length > 1
+      # median  should be big break
       unique_times = @timings_seconds.uniq.sort
-      @big_break_time = unique_times[(unique_times.length-1)/2]/60
-	else
-	  @big_break_time = @timings_seconds[0]
-	end
+      @big_break_time = unique_times[(unique_times.length-1)/2]/60 # convert back to minutes
+    else
+      @big_break_time = @timings_seconds[0]
+    end
+    puts "got big break time #{@big_break_time}"
   end
 
   def initialize
