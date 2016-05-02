@@ -33,16 +33,17 @@ class MainWindow < JFrame
     got_minutes = SwingHelpers.get_user_input("Enter your timing minutes, like 25, 4, 25, 4, 25, 15 for 3x25 minute pomodoros, with 4 minute breaks, and a 15 minute long break [must be small break < large break < pomo]\nor a single number for repated countdown timer", Storage['timings'].join(', '))
     Storage['timings'] = got_minutes.split(',').map{|n| n.strip}
     @timings_seconds = got_minutes.split(',').map{|minute| minute.to_f*60}
-    @break_time = @timings_seconds.min/60 # break time is smallest number
     if @timings_seconds.length > 1
+      @little_break_time = @timings_seconds.min/60 # break time is smallest number
       # median  should be big break
       unique_times = @timings_seconds.uniq.sort
       @big_break_time_minutes = unique_times[(unique_times.length-1)/2]/60 # convert back to minutes
+      if @big_break_time_minutes * 60 > @timings_seconds[0]
+        raise "big break time seems to not be following pattern, double check pattern" # if we don't raise here it never shows the initial window somehow [?] XXXX
+      end
     else
-      @big_break_time_minutes = @timings_seconds[0] / 60
-    end
-    if @big_break_time_minutes * 60 > @timings_seconds[0]
-      raise "big break time seems to not be following pattern, double check pattern" # if we don't raise here it never shows the initial window somehow [?] XXXX
+      @big_break_time_minutes = @timings_seconds[0] / 60 + 1 # everything is "not" a big break here...
+      @little_break_time = 0
     end
   end
 
@@ -144,7 +145,7 @@ class MainWindow < JFrame
   end
 
   def am_in_big_break? minutes
-    minutes == @big_break_time_minutes || @real_name == 'break'
+    minutes == @big_break_time_minutes || @real_name == 'break' 
   end
   
   def am_in_little_break? minutes
@@ -152,8 +153,8 @@ class MainWindow < JFrame
   end
     
   def setup_pomo_name minutes
-     if minutes >= @break_time
-  	 if !am_in_big_break?(minutes)
+     if minutes > @little_break_time
+  	 if !am_in_big_break?(minutes) || @timings_seconds.length == 1
   	   begin
              @real_name = SwingHelpers.get_user_input("name for next pomodoro (from top of list)? #{minutes}m", Storage['real_name'])
   	   rescue Exception => canceled
