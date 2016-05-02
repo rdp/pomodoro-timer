@@ -25,9 +25,9 @@ class MainWindow < JFrame
   Storage = ::Storage.new("pomo_timer")
   Storage.set_default('all_done', [])
   
-  def setup_timings
+  def setup_timings_once
     timings = Storage['timings'] ||= ['25','4','25','15']
-    got_minutes = SwingHelpers.get_user_input("Enter your timing minutes, like 25, 4, 25, 4, 25, 15 for 3x25 minute pomodoros, with 4 minute breaks, and a 15 minute long break [must be small break < large break < pomo]", Storage['timings'].join(', '))
+    got_minutes = SwingHelpers.get_user_input("Enter your timing minutes, like 25, 4, 25, 4, 25, 15 for 3x25 minute pomodoros, with 4 minute breaks, and a 15 minute long break [must be small break < large break < pomo]\nor a single number for repated countdown timer", Storage['timings'].join(', '))
     Storage['timings'] = got_minutes.split(',').map{|n| n.strip}
     @timings_seconds = got_minutes.split(',').map{|minute| minute.to_f*60}
     @break_time = @timings_seconds.min/60 # break time is smallest number
@@ -36,9 +36,9 @@ class MainWindow < JFrame
       unique_times = @timings_seconds.uniq.sort
       @big_break_time_minutes = unique_times[(unique_times.length-1)/2]/60 # convert back to minutes
     else
-      @big_break_time_minutes = @timings_seconds[0]
+      @big_break_time_minutes = @timings_seconds[0] / 60
     end
-    if @big_break_time_minutes * 60 >= @timings_seconds[0]
+    if @big_break_time_minutes * 60 > @timings_seconds[0]
       raise "big break time seems to not be following pattern, double check pattern" # if we don't raise here it never shows the initial window somehow [?] XXXX
     end
   end
@@ -66,7 +66,7 @@ class MainWindow < JFrame
   end
   
   def go
-      setup_timings
+      setup_timings_once
       @cur_index = 0
       setup_pomo_name @timings_seconds[@cur_index]/60
       @start_time = Time.now
@@ -135,28 +135,30 @@ class MainWindow < JFrame
   end
     
   def setup_pomo_name minutes
-     if minutes > @break_time
-  	   if minutes > @big_break_time_minutes
-  	     begin
-           @real_name = SwingHelpers.get_user_input("name for next pomodoro (from top of list)? #{minutes}m", Storage['real_name']) 
-  		   rescue Exception => canceled
-		     puts 'exiting...'
-  		     close
-  		   end
-  		   Storage['real_name'] = @real_name
-         @name = @real_name
-  		   Thread.new { 
-  		     sleep 1.0 
-  		     minimize
-  		   }
-  	   else
-  	     @name = "big break!"
-  		 end
+     if minutes >= @break_time
+  	 if minutes >= @big_break_time_minutes
+  	   begin
+             @real_name = SwingHelpers.get_user_input("name for next pomodoro (from top of list)? #{minutes}m", Storage['real_name'])
+  	   rescue Exception => canceled
+	     puts "exiting...#{canceled}" 
+  	     close # why?
+  	   end
+  	   Storage['real_name'] = @real_name
+           @name = @real_name
+  	   Thread.new { 
+  	     sleep 1.0 
+  	     minimize
+  	   }
+  	 else
+  	   @name = "big break!"
+  	 end
      else
-       @name = "break!"
+       @name = "little break!"
      end
   end
-
+  if $VERBOSE
+    puts "set name to #{@name}"
+  end
 end
 
 if $0 == __FILE__
