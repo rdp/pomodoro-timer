@@ -13,12 +13,15 @@ class MainWindow < JFrame
   def set_normal_size
     set_size 250,0
     self.always_on_top=true # I think I need to redo this after each JOptionPane call for jdk6...
+    if $VERBOSE
+      puts "setting normal size"
+    end
   end
   
-  def super_size
-    unminimize
+  def super_size_blocking_screen
+    unminimize # restore
     set_size 1650,1000
-	p 'setting it always on top'
+    p 'setting it large and always on top'
     self.always_on_top=true # I think I need to redo this after each JOptionPane call for jdk6...
   end
 
@@ -45,9 +48,9 @@ class MainWindow < JFrame
 
   def initialize
       super # avoid weird bugz in calling methods before proper initialization...
-	  #frame.setDefaultCloseOperation(JFrame::EXIT_ON_CLOSE) <sigh>
+      #frame.setDefaultCloseOperation(JFrame::EXIT_ON_CLOSE) <sigh>
       set_normal_size
-	  set_location 100,100
+      set_location 100,100
       set_undecorated true # allow opacity mac
       com.sun.awt.AWTUtilities.setWindowOpacity(self, 0.8) 
       happy = Font.new("Tahoma", Font::PLAIN, 11)
@@ -55,20 +58,19 @@ class MainWindow < JFrame
       @name_label.font = happy
       @name_label.set_bounds(44,4,1600,14)
       
-      panel = JPanel.new
-      @panel = panel
-      panel.set_layout nil
-      add panel # why can't I just slap these down?
-      panel.add @name_label
+      @panel = JPanel.new
+      @panel.set_layout nil
+      add @panel # why can't I just slap these down?
+      @panel.add @name_label
       after_closed {
-        SwingHelpers.hard_exit! # ignore those extra timers, blah blah XXXX why does this exist though?
+        SwingHelpers.hard_exit! # ignore those extra timers, blah blah XXXX close timers right :|
       }
   end
   
   def go
       setup_timings_once
-      @cur_index = 0
-      setup_pomo_name @timings_seconds[@cur_index]/60
+      @cur_index = -1
+      handle_done_with_current 0
       @start_time = Time.now
       @switch_image_timer = javax.swing.Timer.new(500, nil) # nil means it has no default person to call when the action has occurred...
       @switch_image_timer.add_action_listener { |e|
@@ -91,10 +93,10 @@ class MainWindow < JFrame
   def update_current_icon_with_current_time seconds_left, seconds_requested
       minutes_left = seconds_left/60
       # half time double check popup:
-      if (seconds_left < seconds_requested/2) && !@already_shown_on_task_question && !am_in_break?(minutes_left)
-        super_size
-        SwingHelpers.show_blocking_message_dialog "half-time check: are you on target for (#{@name})? [also working for work?]"
+      if (seconds_left < seconds_requested/2) && !@already_shown_on_task_question && !am_in_little_break?(minutes_left)
         set_normal_size
+        SwingHelpers.show_blocking_message_dialog "half-time check: are you on target for (#{@name})? [also working for work?]"
+        set_normal_size # ??
         @already_shown_on_task_question = true
       end
       if seconds_left > 99 # more than two digits worth of seconds, so use minutes :)
@@ -110,33 +112,42 @@ class MainWindow < JFrame
   end
   
   def handle_done_with_current seconds_requested
-      super_size
-      set_title 'done!'
-      Storage['all_done'] = Storage['all_done'] + [@real_name] # save history away for posterity... 
-      sound = PlayMp3Audio.new(File.dirname(__FILE__) + '/diesel.mp3')
-      sound.start
+      set_normal_size
       next_up = @timings_seconds[(@cur_index+1) % @timings_seconds.length]
-      SwingHelpers.show_blocking_message_dialog "Timer done! (#{@name}) #{seconds_requested/60}m at #{Time.now}. Next up #{next_up/60}m." 
-      sound.stop
+      if seconds_requested > 0
+        set_title 'done!'
+        Storage['all_done'] = Storage['all_done'] + [@real_name] # save history away for posterity... 
+        sound = PlayMp3Audio.new(File.dirname(__FILE__) + '/diesel.mp3')
+        sound.start
+        SwingHelpers.show_blocking_message_dialog "Timer done! (#{@name}) #{seconds_requested/60}m at #{Time.now}. Next up #{next_up/60}m." 
+        sound.stop
+      end # else its just setup...
       next_minutes = next_up/60
       setup_pomo_name next_minutes
-      if(next_minutes > @break_time)
+      if am_in_little_break?(next_minutes)
         set_normal_size
       else
-        super_size # for breaks to force them...
+        super_size_blocking_screen # for breaks to force them...
+      end
+      if am_in_big_break? next_minutes
+        super_size_blocking_screen # force it...
       end
       @start_time = Time.now
       @cur_index += 1
       @already_shown_on_task_question = false # reset
   end
+
+  def am_in_big_break? minutes
+    minutes == @big_break_time_minutes || @real_name == 'break'
+  end
   
-  def am_in_break? minutes
+  def am_in_little_break? minutes
     minutes < @big_break_time_minutes
   end
     
   def setup_pomo_name minutes
      if minutes >= @break_time
-  	 if minutes >= @big_break_time_minutes
+  	 if !am_in_big_break?(minutes)
   	   begin
              @real_name = SwingHelpers.get_user_input("name for next pomodoro (from top of list)? #{minutes}m", Storage['real_name'])
   	   rescue Exception => canceled
