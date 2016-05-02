@@ -60,7 +60,7 @@ class MainWindow < JFrame
       
       @panel = JPanel.new
       @panel.set_layout nil
-      add @panel # why can't I just slap these down?
+      add @panel # why can't I just slap these down? oh well...
       @panel.add @name_label
       after_closed {
         SwingHelpers.hard_exit! # ignore those extra timers, blah blah XXXX close timers right :|
@@ -70,7 +70,7 @@ class MainWindow < JFrame
   def go
       setup_timings_once
       @cur_index = -1
-      handle_done_with_current 0
+      handle_done_with_current 0 # setup :)
       @start_time = Time.now
       @switch_image_timer = javax.swing.Timer.new(500, nil) # nil means it has no default person to call when the action has occurred...
       @switch_image_timer.add_action_listener { |e|
@@ -107,10 +107,16 @@ class MainWindow < JFrame
         icon_time = current_time # have the 's' in there
       end
       self.icon_image = CreateIconFromNumbers.get_letters_as_icon(icon_time, 128) # it auto scales it down for us
+      if OS.mac?
+        com.apple.eawt.Application.getApplication().setDockIconImage self.icon_image # http://stackoverflow.com/questions/11253772/setting-the-default-application-icon-image-in-java-swing-on-os-x :|
+      end
       set_title current_time + " " + @name
       @name_label.text = @name + " " + current_time + "/#{seconds_requested/60}m"
+      if $VERBOSE
+        puts "updated icon to #{@name_label.text}"
+      end
   end
-  
+
   def handle_done_with_current seconds_requested
       set_normal_size
       next_up = @timings_seconds[(@cur_index+1) % @timings_seconds.length]
@@ -124,17 +130,17 @@ class MainWindow < JFrame
       end # else its just setup...
       next_minutes = next_up/60
       setup_pomo_name next_minutes
+      @start_time = Time.now
+      @cur_index += 1
+      @already_shown_on_task_question = false # reset
       if am_in_little_break?(next_minutes)
         set_normal_size
       else
         super_size_blocking_screen # for breaks to force them...
       end
       if am_in_big_break? next_minutes
-        super_size_blocking_screen # force it...
+        super_size_blocking_screen # force breaks...
       end
-      @start_time = Time.now
-      @cur_index += 1
-      @already_shown_on_task_question = false # reset
   end
 
   def am_in_big_break? minutes
