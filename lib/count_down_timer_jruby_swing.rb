@@ -80,10 +80,9 @@ class MainWindow < JFrame
 	end
         seconds_requested = @timings_seconds[@cur_index % @timings_seconds.length]
         seconds_left = (seconds_requested - (Time.now - @start_time)).to_i
+        update_current_icon_with_current_time seconds_left, seconds_requested # update even if done, so that after resume from sleep it still sees an update
         if seconds_left < 0
           handle_done_with_current seconds_requested
-        else
-          update_current_icon_with_current_time seconds_left, seconds_requested		 
         end
       }
       @switch_image_timer.start
